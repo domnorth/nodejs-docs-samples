@@ -17,7 +17,7 @@
 var http = require('http');
 var handleRequest = function (req, res) {
   res.writeHead(200);
-  res.end('Hello Travis and gCloud v2 Kubernetes!');
+  res.end('Hello World v7.2 from Travis & gCloud Kubernetes! Mon Feb 20 00:59:08 EST 2017');
 };
 var www = http.createServer(handleRequest);
 www.listen(process.env.PORT || 8080);
