@@ -17,7 +17,7 @@
 var http = require('http');
 var handleRequest = function (req, res) {
   res.writeHead(200);
-  res.end('Hello World v19.2 from Travis & gCloud Kubernetes! Mon Feb 20 80:59:08 EST 2017');
+  res.end('Hello World v23.1 from Travis & gCloud Kubernetes! Mon Feb 20 77:77:77 EST 2017');
 
 };
 var www = http.createServer(handleRequest);
