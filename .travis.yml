@@ -28,6 +28,7 @@ before_install:
 - ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 - gcloud --version
 - gcloud config list
+- gcloud config set disable_usage_reporting true
 
 install:
 - gcloud --quiet components update kubectl
