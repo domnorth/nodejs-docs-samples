@@ -13,6 +13,7 @@ env:
 - GAE_PYTHONPATH=${HOME}/.cache/google_appengine PATH=$PATH:${HOME}/google-cloud-sdk/bin
   PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH} CLOUDSDK_CORE_DISABLE_PROMPTS=1 GCLOUD_PROJECT_NAME=silent-presence-117620
   CLOUDSDK_CORE_PROJECT=silent-presence-117620 CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
+  GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
 
 # hello-world-deployment
 
@@ -32,7 +33,7 @@ install:
 #- gcloud --quiet components update kubectl
 - tar -xzf credentials.tar.gz
 - mkdir -p lib
-- gcloud auth activate-service-account --key-file client-secret.json
+- gcloud auth activate-service-account $GCLOUD_EMAIL --key-file client-secret.json
 - gcloud config set project $GCLOUD_PROJECT_NAME
 #- gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
 
