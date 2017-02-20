@@ -30,7 +30,7 @@ before_install:
 - gcloud config list
 
 install:
-#- gcloud --quiet components update kubectl
+- gcloud --quiet components update kubectl
 - tar -xzf credentials.tar.gz
 - mkdir -p lib
 - gcloud auth activate-service-account $GCLOUD_EMAIL --key-file client-secret.json
