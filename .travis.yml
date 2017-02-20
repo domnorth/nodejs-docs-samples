@@ -24,17 +24,17 @@ before_install:
 - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; curl https://sdk.cloud.google.com | bash; fi
 # Add gcloud to $PATH
 - source /home/travis/google-cloud-sdk/path.bash.inc
+- ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 - gcloud --version
 - gcloud config list
 
 install:
-- gcloud --quiet components update kubectl
+#- gcloud --quiet components update kubectl
 - tar -xzf credentials.tar.gz
 - mkdir -p lib
 - gcloud auth activate-service-account --key-file client-secret.json
 - gcloud config set project $GCLOUD_PROJECT_NAME
 #- gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
-- ssh-keygen -f ~/.ssh/google_compute_engine -N ""
 
 script:
 - docker build    -t gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TRAVIS_JOB_NUMBER} .
