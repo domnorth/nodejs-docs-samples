@@ -33,8 +33,6 @@ install:
 - gcloud auth activate-service-account --key-file client-secret.json
 - gcloud config set project $GCLOUD_PROJECT_NAME
 - gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
-gcloud config set project silent-presence-117620
-
 - ssh-keygen -f ~/.ssh/google_compute_engine -N ""
 
 script:
