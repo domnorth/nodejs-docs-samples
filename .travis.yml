@@ -15,7 +15,7 @@ env:
   CLOUDSDK_CORE_PROJECT=hello-world
 
 before_install:
-_ env
+- env
 - cd containerengine/hello-world
 - openssl aes-256-cbc -K $encrypted_0fc78259f5c7_key -iv $encrypted_0fc78259f5c7_iv
   -in credentials.tar.gz.enc -out credentials.tar.gz -d
