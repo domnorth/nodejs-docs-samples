@@ -35,7 +35,7 @@ install:
 - mkdir -p lib
 - gcloud auth activate-service-account $GCLOUD_EMAIL --key-file client-secret.json
 - gcloud config set project $GCLOUD_PROJECT_NAME
-#- gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
+- gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
 
 script:
 - docker build    -t gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TRAVIS_JOB_NUMBER} .
