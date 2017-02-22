@@ -74,11 +74,14 @@ script:
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
-# check to see if this image exists before creating it, else update via rolling-update
-- kubectl get rc | grep ${CONTAINER_NAME} \
-     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
-     && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
+# check to see if this image exists before creating it, else update via rolling-update
+- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null \
+     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
+     && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
+# the above could have been done more effectively via a yaml file, but for now above is easier to automate and debug
+
+#    || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
 after_success:
 - cal
 # Useful resources: https://cloud.google.com/container-registry/
