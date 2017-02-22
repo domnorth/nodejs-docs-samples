@@ -71,22 +71,27 @@ script:
 - IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}:${TAG}
 - for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
 
-- sed -i -e s^{{.*NEW_STUFF.*}}^$IMAGE $(date)^ server.js
+- sed -i -e "s^{{.*NEW_STUFF.*}}^$IMAGE $(date)^" server.js
 
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
 
 # kept in simple for now ... just update ..
-- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
+#- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
+
+- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null \ 
+      && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} \
+      || { \
+           sed -e s^{{.*IMAGE.*}}^$IMAGE^ hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ; \
+           kubectl create -f hw-deployment.yaml --record
+         } \
 
 # TODO: check to see if this image exists before creating it, else update via rolling-update
-# - kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null \
 #     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
 #     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
 #      && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 # the above could have been done more effectively via a yaml file, but for now above is easier to automate and debug
-# sed -e s^{{.*IMAGE.*}}^$IMAGE^ hw-deployment.yaml.TEMPLATE > hw-deployment.yaml
 
 after_success:
 - cal
