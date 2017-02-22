@@ -15,8 +15,8 @@ env:
   CLOUDSDK_CORE_PROJECT=silent-presence-117620 CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
   GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
-  VERSION_MASTER=${VERSION_MASTER:="undefined"}
-  VERSION_MNINOR=${VERSION_MINOR:="undefined"}
+  VERSION_MASTER=${VERSION_MASTER:=undefined}
+  VERSION_MNINOR=${VERSION_MINOR:=undefined}
   CONTAINER_NAME=hello-world-deployment
   CONTAINER_APP_LABEL=hello-world
   CONTAINER_IMAGE_RESOURCE_TYPE="deployment"
@@ -54,7 +54,7 @@ script:
 #
 - shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
 - if [[ $TRAVIS_BRANCH == "master" ]]; then 
-       IMAGE_NAME_SUFFIX="Production";
+       IMAGE_NAME_SUFFIX="production";
        TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}"; 
        TAG_SUFFIX="";
        TAG_LATEST=1;
@@ -64,7 +64,7 @@ script:
   fi
 - if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="Staging";TAG_SUFFIX="-Develop"; fi
 - if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="QA"     ;TAG_SUFFIX="-Test"   ; fi
-- if [[ $IMAGE_NAME_SUFFIX == ""    ]]; then IMAGE_NAME_SUFFIX="DevTest";TAG_SUFFIX="-DevTest"; fi
+- if [[ $IMAGE_NAME_SUFFIX == ""    ]]; then IMAGE_NAME_SUFFIX="DevTest";TAG_SUFFIX="-devtest"; fi
 
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}_${IMAGE_NAME_SUFFIX}"
