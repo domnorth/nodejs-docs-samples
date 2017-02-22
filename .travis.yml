@@ -53,7 +53,7 @@ script:
 #
 - shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
 - if [[ $TRAVIS_BRANCH == "master" ]]; then 
-       IMAGE_NAME_SUFFIX="Production"
+       IMAGE_NAME_SUFFIX="Production";
        TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}; 
        TAG_SUFFIX="";
        TAG_LATEST=1;
@@ -68,6 +68,8 @@ script:
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - IMAGE_NAME="${TRAVIS_REPO_SLUG}_${IMAGE_NAME_SUFFIX}"
 - IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}_:${TAG}
+- for var in TAG IMAGE_NAME IMAGE GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
+
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
