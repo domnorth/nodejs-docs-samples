@@ -80,13 +80,9 @@ script:
 # kept in simple for now ... just update ..
 #- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
-- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null  
-      && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} 
-      || { 
-           sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ; 
-           kubectl create -f hw-deployment.yaml --record 
-         } 
-
+- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER=1 || CREATE_CONTAINER=0
+- if [ $CREATE_CONTAINER == "1" ]; then kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
+  else ; sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ; kubectl create -f hw-deployment.yaml --record ; fi
 # TODO: check to see if this image exists before creating it, else update via rolling-update
 #     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
 #     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
