@@ -71,7 +71,7 @@ script:
 - IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}:${TAG}
 - for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
 
-- sed -i -e "s^{{.*NEW_STUFF.*}}^$IMAGE $(date)^" server.js
+- sed -i -e "s^{{.*NEW_STUFF.*}}^${IMAGE} $(date)^" server.js
 
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
@@ -83,7 +83,7 @@ script:
 - kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null  
       && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} 
       || { 
-           sed -e s^{{.*IMAGE.*}}^$IMAGE^ hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ; 
+           sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ; 
            kubectl create -f hw-deployment.yaml --record 
          } 
 
