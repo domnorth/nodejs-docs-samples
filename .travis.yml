@@ -15,11 +15,19 @@ env:
   CLOUDSDK_CORE_PROJECT=silent-presence-117620 CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
   GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
+  VERSION_MASTER=${VERSION_MASTER:="undefined"}
+  VERSION_MNINOR=${VERSION_MINOR:="undefined"}
 
  #hello-world-deployment
 
 before_install:
-#- env
+#- env # albeit convenient, shows encrypted vars too
+# To deBug: better to list key variables
+- for var in VERSION_MASTER VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
+# for Master branch, ensure that Major and Minor numbers are defined
+- if [[ $TRAVIS_BRANCH == "master" && ($VERSION_MASTER||$VERSION_MASTER == "undefined"||$VERSION_MINOR||$VERSION_MINOR != "undefined")]]; then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
+# * TODO: check for more like above condidtion ... for now assume things are sane
+#
 - cd containerengine/hello-world
 - openssl aes-256-cbc -K $encrypted_0fc78259f5c7_key -iv $encrypted_0fc78259f5c7_iv
   -in credentials.tar.gz.enc -out credentials.tar.gz -d
@@ -40,18 +48,34 @@ install:
 - gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
 
 script:
-#- if [ TRAVIS_BRANCH == "master" && VERSIONs are defined];then TAG=v
-#- if [ TRAVIS_BRANCH != "master" && VERSIONs are not defined ] ; then confused; beter fail
-# process: https://www.pivotaltracker.com/blog/experience-report-github-flow-pivotal-web-services/
-#  http://softwareengineering.stackexchange.com/questions/255404/how-to-use-github-branches-and-automatic-releases-for-version-management
-#  https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-#  need to ensure TRAVIS_BRANCH has no spaces and valid characters
-- TAG="v0.0.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}"
-- docker build    -t    us.gcr.io/$GCLOUD_PROJECT_NAME/hw:${TAG} .
-- gcloud docker -- push us.gcr.io/$GCLOUD_PROJECT_NAME/hw:${TAG} > /dev/null
+# * TODO: Need to ensure TRAVIS_BRANCH has no spaces and valid characters
+# Requirements: https://gist.github.com/domnorth/aca09db77820cbd8dd0fb50cb872b757
+#
+- shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
+- if [[ $TRAVIS_BRANCH == "master" ]]; then 
+       TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}; 
+       TAG_LATEST=1;
+       IMAGE_NAME_SUFFIX="Production"
+  else 
+       TAG_PREFIX="v0.0"; 
+       TAG_LATEST=0;
+  fi
+- if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="Staging";TAG_SUFFIX="Develop"; fi
+- if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="QA"     ;TAG_SUFFIX="Test"   ; fi
+- if [[ $IMAGE_NAME_SUFFIX          ]]; then IMAGE_NAME_SUFFIX="DevTest";TAG_SUFFIX="DevTest"; fi
+
+- TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}-${TAG_SUFFIX}"
+- IMAGE_NAME="${TRAVIS_REPO_SLUG}_${IMAGE_NAME_SUFFIX}"
+- IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}_:${TAG}
+- docker build    -t    ${IMAGE} .
+- gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
-- kubectl rolling-update hello-world-deployment --image=gcr.io/silent-presence-117620/hw:${TAG}
-#- kubectl set image deployment/hello-world-deployment hello-world=gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TAG}
+- kubectl rolling-update hello-world-deployment --image=${IMAGE}
+#- kubectl set image deployment/hello-world-deployment hello-world=${IMAGE}
 
 after_success:
 - cal
+# Useful resources: https://cloud.google.com/container-registry/
+# process: https://www.pivotaltracker.com/blog/experience-report-github-flow-pivotal-web-services/
+#  http://softwareengineering.stackexchange.com/questions/255404/how-to-use-github-branches-and-automatic-releases-for-version-management
+#  https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
