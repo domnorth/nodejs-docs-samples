@@ -53,18 +53,19 @@ script:
 #
 - shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
 - if [[ $TRAVIS_BRANCH == "master" ]]; then 
-       TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}; 
-       TAG_LATEST=1;
        IMAGE_NAME_SUFFIX="Production"
+       TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}; 
+       TAG_SUFFIX="";
+       TAG_LATEST=1;
   else 
        TAG_PREFIX="v0.0"; 
        TAG_LATEST=0;
   fi
-- if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="Staging";TAG_SUFFIX="Develop"; fi
-- if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="QA"     ;TAG_SUFFIX="Test"   ; fi
-- if [[ $IMAGE_NAME_SUFFIX          ]]; then IMAGE_NAME_SUFFIX="DevTest";TAG_SUFFIX="DevTest"; fi
+- if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="Staging";TAG_SUFFIX="-Develop"; fi
+- if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="QA"     ;TAG_SUFFIX="-Test"   ; fi
+- if [[ $IMAGE_NAME_SUFFIX == ""    ]]; then IMAGE_NAME_SUFFIX="DevTest";TAG_SUFFIX="-DevTest"; fi
 
-- TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}-${TAG_SUFFIX}"
+- TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - IMAGE_NAME="${TRAVIS_REPO_SLUG}_${IMAGE_NAME_SUFFIX}"
 - IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}_:${TAG}
 - docker build    -t    ${IMAGE} .
