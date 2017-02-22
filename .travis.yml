@@ -17,8 +17,9 @@ env:
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
   VERSION_MASTER=${VERSION_MASTER:="undefined"}
   VERSION_MNINOR=${VERSION_MINOR:="undefined"}
-
- #hello-world-deployment
+  CONTAINER_NAME=hello-world-deployment
+  CONTAINER_APP_LABEL=hello-world
+  CONTAINER_IMAGE_RESOURCE_TYPE="deployment"
 
 before_install:
 #- env # albeit convenient, shows encrypted vars too
@@ -73,8 +74,9 @@ script:
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
-- kubectl rolling-update hello-world-deployment --image=${IMAGE}
-#- kubectl set image deployment/hello-world-deployment hello-world=${IMAGE}
+# check to see if this image exists before creating it
+- kubectl get rc | grep ${CONTAINER_NAME} || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE}
+- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
 after_success:
 - cal
