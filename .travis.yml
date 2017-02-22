@@ -40,11 +40,18 @@ install:
 - gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
 
 script:
-- docker build    -t gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TRAVIS_JOB_NUMBER} .
-- gcloud docker -- push gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TRAVIS_JOB_NUMBER} > /dev/null
+#- if [ TRAVIS_BRANCH == "master" && VERSIONs are defined];then TAG=v
+#- if [ TRAVIS_BRANCH != "master" && VERSIONs are not defined ] ; then confused; beter fail
+# process: https://www.pivotaltracker.com/blog/experience-report-github-flow-pivotal-web-services/
+#  http://softwareengineering.stackexchange.com/questions/255404/how-to-use-github-branches-and-automatic-releases-for-version-management
+#  https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+#  need to ensure TRAVIS_BRANCH has no spaces and valid characters
+- TAG="v0.0.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}"
+- docker build    -t    us.gcr.io/$GCLOUD_PROJECT_NAME/hw:${TAG} .
+- gcloud docker -- push us.gcr.io/$GCLOUD_PROJECT_NAME/hw:${TAG} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
-- kubectl rolling-update hello-world-deployment --image=gcr.io/silent-presence-117620/hw:v${TRAVIS_JOB_NUMBER}
-#- kubectl set image deployment/hello-world-deployment hello-world=gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TRAVIS_JOB_NUMBER}
+- kubectl rolling-update hello-world-deployment --image=gcr.io/silent-presence-117620/hw:${TAG}
+#- kubectl set image deployment/hello-world-deployment hello-world=gcr.io/$GCLOUD_PROJECT_NAME/hw:v${TAG}
 
 after_success:
 - cal
