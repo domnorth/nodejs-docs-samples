@@ -54,7 +54,7 @@ script:
 - shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
 - if [[ $TRAVIS_BRANCH == "master" ]]; then 
        IMAGE_NAME_SUFFIX="Production";
-       TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}; 
+       TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}"; 
        TAG_SUFFIX="";
        TAG_LATEST=1;
   else 
