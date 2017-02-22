@@ -74,9 +74,10 @@ script:
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
-# check to see if this image exists before creating it
-- kubectl get rc | grep ${CONTAINER_NAME} || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE}
-- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
+# check to see if this image exists before creating it, else update via rolling-update
+- kubectl get rc | grep ${CONTAINER_NAME} \
+     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
+     && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
 after_success:
 - cal
