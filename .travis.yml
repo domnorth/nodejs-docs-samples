@@ -71,6 +71,8 @@ script:
 - IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}:${TAG}
 - for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
 
+- sed -i -e s^{{.*NEW_STUFF.*}}^$IMAGE $(date)^ server.js
+
 - docker build    -t    ${IMAGE} .
 - gcloud docker -- push ${IMAGE} > /dev/null
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
