@@ -84,8 +84,8 @@ script:
       && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} \
       || { \
            sed -e s^{{.*IMAGE.*}}^$IMAGE^ hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ; \
-           kubectl create -f hw-deployment.yaml --record
-         } \
+           kubectl create -f hw-deployment.yaml --record \
+         } 
 
 # TODO: check to see if this image exists before creating it, else update via rolling-update
 #     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
