@@ -81,7 +81,7 @@ script:
 # kept in simple for now ... just update ..
 #- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
-- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER="yes" || CREATE_CONTAINER="no"
+- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER="no" || CREATE_CONTAINER="yes"
 - echo CREATE_CONTAINER=$CREATE_CONTAINER
 - if [[ $CREATE_CONTAINER == "no" ]]; then 
        kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
