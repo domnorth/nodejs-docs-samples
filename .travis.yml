@@ -62,8 +62,8 @@ script:
        TAG_PREFIX="v0.0"; 
        TAG_LATEST=0;
   fi
-- if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="Staging";TAG_SUFFIX="-Develop"; fi
-- if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="QA"     ;TAG_SUFFIX="-Test"   ; fi
+- if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="staging";TAG_SUFFIX="-develop"; fi
+- if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="qa"     ;TAG_SUFFIX="-test"   ; fi
 - if [[ $IMAGE_NAME_SUFFIX == ""    ]]; then IMAGE_NAME_SUFFIX="devtest";TAG_SUFFIX="-devtest"; fi
 
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
@@ -92,9 +92,12 @@ script:
        kubectl create -f hw-deployment.yaml --record ;
        LAST_EXIT_CODE=$? ;
   fi
+
+# Note: The following is BETA and can change  per https://cloud.google.com/sdk/gcloud/reference/beta/container/images/list
 - if [[ $LAST_EXIT_CODE == 0 && $TAG_LATEST == 1 ]]; then
       gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:latest;
   fi
+
 # TODO: check to see if this image exists before creating it, else update via rolling-update
 #     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
 #     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
