@@ -18,12 +18,12 @@ env:
   CONTAINER_PORT=8080
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MINOR=${VERSION_MINOR:=undefined}
+  CONTAINER_TYPE="deployment"
 
 
 # the following are not statically defined any more
 # CONTAINER_NAME=hello-world-deployment
 # CONTAINER_APP_LABEL=hello-world
-# CONTAINER_IMAGE_RESOURCE_TYPE="deployment"
 
 before_install:
 #- env # albeit convenient, shows encrypted vars too
@@ -89,7 +89,7 @@ script:
 # kept in simple for now ... just update ..
 #- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
-- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER="no" || CREATE_CONTAINER="yes"
+- kubectl get ${CONTAINER_TYPE} | grep "^${CONTAINER_NAME} " 2>/dev/null && CREATE_CONTAINER="no" || CREATE_CONTAINER="yes"
 - echo CREATE_CONTAINER=$CREATE_CONTAINER
 - if [[ $CREATE_CONTAINER == "no" ]]; then 
        kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} || exit 1 ; 
@@ -110,7 +110,7 @@ script:
 
 # TODO: check to see if this image exists before creating it, else update via rolling-update
 #     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
-#     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
+#     || kubectl set image ${CONTAINER_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
 #      && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 # the above could have been done more effectively via a yaml file, but for now above is easier to automate and debug
 
