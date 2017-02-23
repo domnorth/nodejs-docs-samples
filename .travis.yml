@@ -73,7 +73,8 @@ script:
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}"
 - CONTAINER_POD_LABEL=${IMAGE_NAME}
-- CONTAINER_APP_LABEL="v${VERSION_MAJOR}-${VERSION_MINOR}-${TRAVIS_BUILD_NUMBER}-${TAG_SUFFIX}"
+- CONTAINER_VER_LABEL=${TAG}
+- CONTAINER_APP_LABEL="v${VERSION_MAJOR}-${VERSION_MINOR}-${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - CONTAINER_NAME="${CONTAINER_POD_LABEL}.${ENVIRONMENT_TYPE}"
 - IMAGE_PRETAG=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}
 - IMAGE=${IMAGE_PRETAG}:${TAG}
@@ -108,6 +109,7 @@ script:
            -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
            -e "s^{{.*APP_POD_LABEL.*}}^${CONTAINER_POD_LABEL}^"  
+           -e "s^{{.*VER_POD_LABEL.*}}^${CONTAINER_VER_LABEL}^"  
            -e "s^{{.*APP_CONTAINER_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
        pr -Fn hw-deployment.yaml.TEMPLATE hw-deployment.yaml ;
        kubectl create -f hw-deployment.yaml --record || exit 1 ;
