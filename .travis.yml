@@ -15,7 +15,7 @@ env:
   CLOUDSDK_CORE_PROJECT=silent-presence-117620 CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
   GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
-  VERSION_MASTER=${VERSION_MASTER:=undefined}
+  VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MNINOR=${VERSION_MINOR:=undefined}
   CONTAINER_NAME=hello-world-deployment
   CONTAINER_APP_LABEL=hello-world
@@ -24,9 +24,9 @@ env:
 before_install:
 #- env # albeit convenient, shows encrypted vars too
 # To deBug: better to list key variables
-- for var in VERSION_MASTER VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
+- for var in VERSION_MAJOR VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
 # for Master branch, ensure that Major and Minor numbers are defined
-- if [[ $TRAVIS_BRANCH == "master" && ($VERSION_MASTER||$VERSION_MASTER == "undefined"||$VERSION_MINOR||$VERSION_MINOR != "undefined")]]; then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
+- if [[ $TRAVIS_BRANCH == "master" && ($VERSION_MAJOR||$VERSION_MAJOR == "undefined"||$VERSION_MINOR||$VERSION_MINOR == "undefined")]]; then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
 # * TODO: check for more like above condidtion ... for now assume things are sane
 #
 - cd containerengine/hello-world
@@ -55,7 +55,7 @@ script:
 - shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
 - if [[ $TRAVIS_BRANCH == "master" ]]; then 
        IMAGE_NAME_SUFFIX="production";
-       TAG_PREFIX="v${VERSION_MASTER}.${VERSION_MINOR}"; 
+       TAG_PREFIX="v${VERSION_MAJOR}.${VERSION_MINOR}"; 
        TAG_SUFFIX="";
        TAG_LATEST=1;
   else 
