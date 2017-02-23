@@ -92,20 +92,20 @@ script:
 - kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER="no" || CREATE_CONTAINER="yes"
 - echo CREATE_CONTAINER=$CREATE_CONTAINER
 - if [[ $CREATE_CONTAINER == "no" ]]; then 
-       kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
+       kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} || exit 1 ; 
        LAST_EXIT_CODE=$? ;
   else 
        sed -e "s^{{.*APP_IMAGE.*}}^${IMAGE}^" 
            -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
-           -e "s^{{.*APP_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ;
-       kubectl create -f hw-deployment.yaml --record ;
+           -e "s^{{.*APP_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
+       kubectl create -f hw-deployment.yaml --record || exit 1 ;
        LAST_EXIT_CODE=$? ;
   fi
 
 # Note: The following is BETA and can change  per https://cloud.google.com/sdk/gcloud/reference/beta/container/images/list
 - if [[ $LAST_EXIT_CODE == 0 && $TAG_LATEST == 1 ]]; then
-      gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:latest;
+      gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:latest || exit 1;
   fi
 
 # TODO: check to see if this image exists before creating it, else update via rolling-update
