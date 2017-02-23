@@ -68,15 +68,16 @@ script:
 
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}_${IMAGE_NAME_SUFFIX}"
-- IMAGE=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}:${TAG}
+- IMAGE_PRETAG=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}
+- IMAGE=${IMAGE_PRETAG}:${TAG}
 - for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
 
 - sed -i -e "s^{{.*NEW_STUFF.*}}^${IMAGE} $(date)^" server.js
 - cat server.js
 
-- docker build    -t    ${IMAGE} .
-- gcloud docker -- push ${IMAGE} > /dev/null
-- gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE
+- docker build    -t    ${IMAGE} . || exit 1
+- gcloud docker -- push ${IMAGE} > /dev/null || exit 1
+- gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE || exit 1
 
 # kept in simple for now ... just update ..
 #- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
@@ -85,11 +86,15 @@ script:
 - echo CREATE_CONTAINER=$CREATE_CONTAINER
 - if [[ $CREATE_CONTAINER == "no" ]]; then 
        kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
+       LAST_EXIT_CODE=$? ;
   else 
        sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ;
        kubectl create -f hw-deployment.yaml --record ;
+       LAST_EXIT_CODE=$? ;
   fi
-
+- if [[ $LAST_EXIT_CODE == 0 && $TAG_LATEST == 1 ]]; then
+      gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:latest;
+  fi
 # TODO: check to see if this image exists before creating it, else update via rolling-update
 #     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
 #     || kubectl set image ${CONTAINER_IMAGE_RESOURCE_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
