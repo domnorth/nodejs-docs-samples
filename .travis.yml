@@ -109,7 +109,7 @@ script:
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
            -e "s^{{.*APP_POD_LABEL.*}}^${CONTAINER_POD_LABEL}^"  
            -e "s^{{.*APP_CONTAINER_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
-       pr -Fn hw-deployment.yaml.TEMPLATE hw-deployment.yaml
+       pr -Fn hw-deployment.yaml.TEMPLATE hw-deployment.yaml ;
        kubectl create -f hw-deployment.yaml --record || exit 1 ;
        LAST_EXIT_CODE=$? ;
   fi
