@@ -72,7 +72,8 @@ script:
 
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
 - IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}"
-- CONTAINER_APP_LABEL=${IMAGE_NAME}
+- CONTAINER_APP_LABEL=${TAG}
+- CONTAINER_POD_LABEL=${IMAGE_NAME}
 - CONTAINER_NAME="${CONTAINER_APP_LABEL}.${ENVIRONMENT_TYPE}"
 - IMAGE_PRETAG=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}
 - IMAGE=${IMAGE_PRETAG}:${TAG}
@@ -103,7 +104,8 @@ script:
        sed -e "s^{{.*APP_IMAGE.*}}^${IMAGE}^" 
            -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
-           -e "s^{{.*APP_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
+           -e "s^{{.*APP_POD_LABEL.*}}^${CONTAINER_POD_LABEL}^"  
+           -e "s^{{.*APP_CONTAINER_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
        kubectl create -f hw-deployment.yaml --record || exit 1 ;
        LAST_EXIT_CODE=$? ;
   fi
