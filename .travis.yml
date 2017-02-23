@@ -81,8 +81,9 @@ script:
 # kept in simple for now ... just update ..
 #- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
 
-- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER=1 || CREATE_CONTAINER=0
-- if [[ $CREATE_CONTAINER == "1" ]]; then 
+- kubectl get rc | grep ${CONTAINER_NAME} 2>/dev/null && CREATE_CONTAINER="yes" || CREATE_CONTAINER="no"
+- echo CREATE_CONTAINER=$CREATE_CONTAINER
+- if [[ $CREATE_CONTAINER == "no" ]]; then 
        kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
   else 
        sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ;
