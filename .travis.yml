@@ -105,7 +105,7 @@ script:
        LAST_EXIT_CODE=$? ;
   else 
        sed -e "s^{{.*APP_IMAGE.*}}^${IMAGE}^" 
-           -e "s^{{.*APP_NAME.*}}^${ENVIRONMENT_TYPE}^"  
+           -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
            -e "s^{{.*APP_POD_LABEL.*}}^${CONTAINER_POD_LABEL}^"  
            -e "s^{{.*APP_CONTAINER_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
