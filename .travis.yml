@@ -26,7 +26,8 @@ before_install:
 # To deBug: better to list key variables
 - for var in VERSION_MAJOR VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
 # for Master branch, ensure that Major and Minor numbers are defined
-- if [[ $TRAVIS_BRANCH == "master" && ($VERSION_MAJOR||$VERSION_MAJOR == "undefined"||$VERSION_MINOR||$VERSION_MINOR == "undefined")]]; then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
+- if [[ $TRAVIS_BRANCH == "master" && ($VERSION_MAJOR == "" || $VERSION_MAJOR == "undefined" || $VERSION_MINOR == "" || $VERSION_MINOR == "undefined" )]]; 
+    then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
 # * TODO: check for more like above condidtion ... for now assume things are sane
 #
 - cd containerengine/hello-world
