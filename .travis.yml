@@ -17,14 +17,17 @@ env:
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MINOR=${VERSION_MINOR:=undefined}
-  CONTAINER_NAME=hello-world-deployment
-  CONTAINER_APP_LABEL=hello-world
-  CONTAINER_IMAGE_RESOURCE_TYPE="deployment"
+
+
+# the following are not statically defined any more
+# CONTAINER_NAME=hello-world-deployment
+# CONTAINER_APP_LABEL=hello-world
+# CONTAINER_IMAGE_RESOURCE_TYPE="deployment"
 
 before_install:
-- env # albeit convenient, shows encrypted vars too
+#- env # albeit convenient, shows encrypted vars too
 # To deBug: better to list key variables
-- for var in openVart superSecretVar VERSION_MAJOR VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
+- for var in VERSION_MAJOR VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
 # for Master branch, ensure that Major and Minor numbers are defined
 - if [[ $TRAVIS_BRANCH == "master" && ($VERSION_MAJOR == "" || $VERSION_MAJOR == "undefined" || $VERSION_MINOR == "" || $VERSION_MINOR == "undefined" )]]; 
     then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
@@ -55,7 +58,7 @@ script:
 #
 - shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
 - if [[ $TRAVIS_BRANCH == "master" ]]; then 
-       IMAGE_NAME_SUFFIX="production";
+       ENVIRONMENT_TYPE="production";
        TAG_PREFIX="v${VERSION_MAJOR}.${VERSION_MINOR}"; 
        TAG_SUFFIX="";
        TAG_LATEST=1;
@@ -63,12 +66,14 @@ script:
        TAG_PREFIX="v0.0"; 
        TAG_LATEST=0;
   fi
-- if [[ $TRAVIS_BRANCH == "develop" ]]; then IMAGE_NAME_SUFFIX="staging";TAG_SUFFIX="-develop"; fi
-- if [[ $TRAVIS_BRANCH == "test"    ]]; then IMAGE_NAME_SUFFIX="qa"     ;TAG_SUFFIX="-test"   ; fi
-- if [[ $IMAGE_NAME_SUFFIX == ""    ]]; then IMAGE_NAME_SUFFIX="devtest";TAG_SUFFIX="-devtest"; fi
+- if [[ $TRAVIS_BRANCH == "develop" ]]; then ENVIRONMENT_TYPE="staging";TAG_SUFFIX="-develop"; fi
+- if [[ $TRAVIS_BRANCH == "test"    ]]; then ENVIRONMENT_TYPE="qa"     ;TAG_SUFFIX="-test"   ; fi
+- if [[ $ENVIRONMENT_TYPE == ""     ]]; then ENVIRONMENT_TYPE="devtest";TAG_SUFFIX="-devtest"; fi
 
 - TAG="${TAG_PREFIX}.${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
-- IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}_${IMAGE_NAME_SUFFIX}"
+- IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}"
+- CONTAINER_APP_LABEL=${IMAGE_NAME}
+- CONTAINER_NAME="${CONTAINER_APP_LABEL}_${ENVIRONMENT_TYPE}"
 - IMAGE_PRETAG=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}
 - IMAGE=${IMAGE_PRETAG}:${TAG}
 - for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
@@ -89,7 +94,9 @@ script:
        kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
        LAST_EXIT_CODE=$? ;
   else 
-       sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ;
+       sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" 
+           -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
+           -e "s^{{.*APP_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ;
        kubectl create -f hw-deployment.yaml --record ;
        LAST_EXIT_CODE=$? ;
   fi
