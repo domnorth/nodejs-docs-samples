@@ -77,6 +77,9 @@ script:
 - CONTAINER_NAME="${CONTAINER_APP_LABEL}.${ENVIRONMENT_TYPE}"
 - IMAGE_PRETAG=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}
 - IMAGE=${IMAGE_PRETAG}:${TAG}
+
+# if [[ $ENVIRONMENT_TYPE == ""     ]]; then   else IMAGE=${IMAGE_PRETAG}:${TAG} fi
+
 - for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
 
 # the following could be used to determine if we redeploying a build for which an image already exist
@@ -112,6 +115,9 @@ script:
 
 # Note: The following is BETA and can change  per https://cloud.google.com/sdk/gcloud/reference/beta/container/images/list
 # to to check and see if latest TAG already there ... do we want to avoild multi latest flag ??
+- if [[ $ENVIRONMENT_TYPE != ""     ]]; then
+      gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:${ENVIRONMENT_TYPE} || exit 1;
+  fi
 - if [[ $LAST_EXIT_CODE == 0 && $TAG_LATEST == 1 ]]; then
       gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:latest || exit 1;
   fi
