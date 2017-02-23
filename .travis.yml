@@ -15,6 +15,7 @@ env:
   CLOUDSDK_CORE_PROJECT=silent-presence-117620 CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
   GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
+  CONTAINER_PORT=8080
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MINOR=${VERSION_MINOR:=undefined}
 
@@ -94,8 +95,9 @@ script:
        kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} ; 
        LAST_EXIT_CODE=$? ;
   else 
-       sed -e "s^{{.*IMAGE.*}}^${IMAGE}^" 
+       sed -e "s^{{.*APP_IMAGE.*}}^${IMAGE}^" 
            -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
+           -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
            -e "s^{{.*APP_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml ;
        kubectl create -f hw-deployment.yaml --record ;
        LAST_EXIT_CODE=$? ;
