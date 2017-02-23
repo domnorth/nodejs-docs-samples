@@ -16,7 +16,7 @@ env:
   GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
-  VERSION_MNINOR=${VERSION_MINOR:=undefined}
+  VERSION_MINOR=${VERSION_MINOR:=undefined}
   CONTAINER_NAME=hello-world-deployment
   CONTAINER_APP_LABEL=hello-world
   CONTAINER_IMAGE_RESOURCE_TYPE="deployment"
