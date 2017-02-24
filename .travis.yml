@@ -101,10 +101,7 @@ script:
 
 - kubectl get ${CONTAINER_TYPE} | grep "^${CONTAINER_NAME} " 2>/dev/null && CREATE_CONTAINER="no" || CREATE_CONTAINER="yes"
 - echo CREATE_CONTAINER=$CREATE_CONTAINER
-- if [[ $CREATE_CONTAINER == "no" ]]; then 
-       kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} || exit 1 ; 
-       LAST_EXIT_CODE=$? ;
-  else 
+- if [[ $CREATE_CONTAINER == "yes" ]]; then 
        sed -e "s^{{.*APP_IMAGE.*}}^${IMAGE_PRETAG}:${ENVIRONMENT_TYPE}^" 
            -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
@@ -115,6 +112,9 @@ script:
        kubectl create -f hw-deployment.yaml --record || exit 1 ;
        LAST_EXIT_CODE=$? ;
   fi
+#      kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} || exit 1 ; 
+#      LAST_EXIT_CODE=$? ;
+# else 
 
 # Note: The following is BETA and can change  per https://cloud.google.com/sdk/gcloud/reference/beta/container/images/list
 # to to check and see if latest TAG already there ... do we want to avoild multi latest flag ??
