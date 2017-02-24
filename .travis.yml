@@ -20,7 +20,6 @@ env:
   VERSION_MINOR=${VERSION_MINOR:=undefined}
   CONTAINER_TYPE="deployment"
 
-
 # the following are not statically defined any more
 # CONTAINER_NAME=hello-world-deployment
 # CONTAINER_APP_LABEL=hello-world
