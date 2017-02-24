@@ -20,7 +20,6 @@ env:
   VERSION_MINOR=${VERSION_MINOR:=undefined}
   CONTAINER_TYPE="deployment"
 
-
 # the following are not statically defined any more
 # CONTAINER_NAME=hello-world-deployment
 # CONTAINER_APP_LABEL=hello-world
@@ -34,6 +33,7 @@ before_install:
     then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
 # * TODO: check for more like above condidtion ... for now assume things are sane
 # 
+- curl https://raw.githubusercontent.com/cilerler/rupen/master/README.md
 - cd containerengine/hello-world
 - openssl aes-256-cbc -K $encrypted_0fc78259f5c7_key -iv $encrypted_0fc78259f5c7_iv
   -in credentials.tar.gz.enc -out credentials.tar.gz -d
@@ -118,7 +118,7 @@ script:
 
 # Note: The following is BETA and can change  per https://cloud.google.com/sdk/gcloud/reference/beta/container/images/list
 # to to check and see if latest TAG already there ... do we want to avoild multi latest flag ??
-- if [[ $ENVIRONMENT_TYPE != ""     ]]; then
+- if [[ $TAG_SUFFIX != "-devtest"   ]]; then
       gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:${ENVIRONMENT_TYPE} || exit 1;
   fi
 - if [[ $LAST_EXIT_CODE == 0 && $TAG_LATEST == 1 ]]; then
