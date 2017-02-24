@@ -10,15 +10,21 @@ cache:
   - $HOME/google-cloud-sdk/
 
 env:
-- GAE_PYTHONPATH=${HOME}/.cache/google_appengine PATH=$PATH:${HOME}/google-cloud-sdk/bin
-  PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH} CLOUDSDK_CORE_DISABLE_PROMPTS=1 GCLOUD_PROJECT_NAME=silent-presence-117620
-  CLOUDSDK_CORE_PROJECT=silent-presence-117620 CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
+- GAE_PYTHONPATH=${HOME}/.cache/google_appengine 
+  PATH=$PATH:${HOME}/google-cloud-sdk/bin
+  PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH} 
+  CLOUDSDK_CORE_DISABLE_PROMPTS=1 
+  GCLOUD_PROJECT_NAME=silent-presence-117620
+  CLOUDSDK_CORE_PROJECT=silent-presence-117620 
+  CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
   GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
   GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
   CONTAINER_PORT=8080
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MINOR=${VERSION_MINOR:=undefined}
   CONTAINER_TYPE="deployment"
+  BUILD_VERSION_FILE_DIR="./client/public"
+  BUILD_VERSION_FILE="build_version.txt"
 
 # the following are not statically defined any more
 # CONTAINER_NAME=hello-world-deployment
@@ -34,7 +40,11 @@ before_install:
 # * TODO: check for more like above condidtion ... for now assume things are sane
 # 
 - curl https://raw.githubusercontent.com/cilerler/rupen/master/README.md
-- cd containerengine/hello-world
+- mkdir temp_test_wget
+- cd temp_test_wget
+- wget -r -l1 --no-parent https://raw.githubusercontent.com/cilerler/rupen/master/ || exit 1
+- ls -ltra
+- cd ../containerengine/hello-world
 - openssl aes-256-cbc -K $encrypted_0fc78259f5c7_key -iv $encrypted_0fc78259f5c7_iv
   -in credentials.tar.gz.enc -out credentials.tar.gz -d
 - if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; curl https://sdk.cloud.google.com | bash; fi
@@ -92,6 +102,9 @@ script:
 - sed -i -e "s^{{.*NEW_STUFF.*}}^${IMAGE} ${CONTAINER_NAME} TL=${TAG_LATEST} $(date)^" server.js
 - cat server.js
 
+- mkdir -p ${BUILD_VERSION_FILE_DIR}
+- echo "${TRAVIS_BUILD_NUMBER}" > ${BUILD_VERSION_FILE_DIR}/${BUILD_VERSION_FILE} 
+
 - docker build    -t    ${IMAGE} . || exit 1
 - gcloud docker -- push ${IMAGE} > /dev/null || exit 1
 - gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE || exit 1
@@ -106,7 +119,6 @@ script:
            -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
            -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
            -e "s^{{.*APP_POD_LABEL.*}}^${CONTAINER_POD_LABEL}^"  
-           -e "s^{{.*VER_POD_LABEL.*}}^${CONTAINER_VER_LABEL}^"  
            -e "s^{{.*APP_CONTAINER_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
        pr -Fn hw-deployment.yaml.TEMPLATE hw-deployment.yaml ;
        kubectl create -f hw-deployment.yaml --record || exit 1 ;
