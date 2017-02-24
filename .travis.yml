@@ -54,7 +54,8 @@ before_install:
 
 install:
 - gcloud --quiet components update kubectl
-- tar -xzf credentials.tar.gz
+- tar -xvzf credentials.tar.gz
+- cat .npmrc
 - mkdir -p lib
 - gcloud auth activate-service-account $GCLOUD_EMAIL --key-file $GOOGLE_APPLICATION_CREDENTIALS
 - gcloud config set project $GCLOUD_PROJECT_NAME
@@ -143,6 +144,9 @@ script:
 after_success:
 - cal
 # Useful resources: https://cloud.google.com/container-registry/
+#  https://cloud.google.com/solutions/continuous-delivery-with-travis-ci
+#  https://docs.travis-ci.com/user/notifications#Configuring-slack-notifications
 # process: https://www.pivotaltracker.com/blog/experience-report-github-flow-pivotal-web-services/
 #  http://softwareengineering.stackexchange.com/questions/255404/how-to-use-github-branches-and-automatic-releases-for-version-management
 #  https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+
