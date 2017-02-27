@@ -10,143 +10,24 @@ cache:
   - $HOME/google-cloud-sdk/
 
 env:
-- GAE_PYTHONPATH=${HOME}/.cache/google_appengine 
-  PATH=$PATH:${HOME}/google-cloud-sdk/bin
-  PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH} 
-  CLOUDSDK_CORE_DISABLE_PROMPTS=1 
-  GCLOUD_PROJECT_NAME=silent-presence-117620
-  CLOUDSDK_CORE_PROJECT=silent-presence-117620 
-  CONTAINER_CLUSTER=dom-example-cluster CLOUDSDK_COMPUTE_ZONE=us-central1-b 
-  GCLOUD_EMAIL=continuous-integration-test-tr@silent-presence-117620.iam.gserviceaccount.com
-  GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
-  CONTAINER_PORT=8080
+# To deploy, define below vars in this .travis.yml file or in Travi-CI configuration
+#- TRAVIS_CI_DEPLOYMENT=https://github.com/smartprocure/einstein-nanobots/tree/master/dev-ops/travis-ci
+- TRAVIS_CI_DEPLOYMENT=https://github.com/smartprocure/einstein-nanobots/tree/ZD19127/dev-ops/travis-ci
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MINOR=${VERSION_MINOR:=undefined}
-  CONTAINER_TYPE="deployment"
   BUILD_VERSION_FILE_DIR="./client/public"
   BUILD_VERSION_FILE="build_version.txt"
 
-# the following are not statically defined any more
-# CONTAINER_NAME=hello-world-deployment
-# CONTAINER_APP_LABEL=hello-world
-
 before_install:
-#- env # albeit convenient, shows encrypted vars too
-# To deBug: better to list key variables
-- for var in VERSION_MAJOR VERSION_MINOR TRAVIS_BUILD_NUMBER TRAVIS_BRANCH TRAVIS_REPO_SLUG ; do eval echo $var=\$$var; done
-# for Master branch, ensure that Major and Minor numbers are defined
-- if [[ $VERSION_MAJOR == "" || $VERSION_MAJOR == "undefined" || $VERSION_MINOR == "" || $VERSION_MINOR == "undefined" ]]; 
-    then echo "Houston, we have a problem! Cannot launch deployment";exit 1; fi
-# * TODO: check for more like above condidtion ... for now assume things are sane
 # 
-- curl https://raw.githubusercontent.com/cilerler/rupen/master/README.md
-# https://docs.travis-ci.com/user/installing-dependencies/#Installing-Projects-from-Source
-- cd containerengine/hello-world
-- openssl aes-256-cbc -K $encrypted_0fc78259f5c7_key -iv $encrypted_0fc78259f5c7_iv
-  -in credentials.tar.gz.enc -out credentials.tar.gz -d
-- if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; curl https://sdk.cloud.google.com | bash; fi
-# Add gcloud to $PATH
-- source /home/travis/google-cloud-sdk/path.bash.inc
-- ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
-- gcloud --version
-- gcloud config list
-- gcloud config set disable_usage_reporting true
 
 install:
-- gcloud --quiet components update kubectl
-- tar -xvzf credentials.tar.gz
-- cat .npmrc
-- mkdir -p lib
-- gcloud auth activate-service-account $GCLOUD_EMAIL --key-file $GOOGLE_APPLICATION_CREDENTIALS
-- gcloud config set project $GCLOUD_PROJECT_NAME
-- gcloud config set compute/zone $CLOUDSDK_COMPUTE_ZONE
+#
 
 script:
-# * TODO: Need to ensure TRAVIS_BRANCH has no spaces and valid characters
-# Requirements: https://gist.github.com/domnorth/aca09db77820cbd8dd0fb50cb872b757
 #
-- shopt -s nocasematch # insensitive case matching, to compare two strings ignoring case
-- if [[ $TRAVIS_BRANCH == "master" ]]; then 
-       ENVIRONMENT_TYPE="production";
-       TAG_SUFFIX="";
-       TAG_LATEST=1;
-  else 
-       TAG_LATEST=0;
-  fi
-- TAG_PREFIX="${VERSION_MAJOR}-${VERSION_MINOR}"; 
-- if [[ $TRAVIS_BRANCH == "develop" ]]; then ENVIRONMENT_TYPE="staging";TAG_SUFFIX="-develop"; fi
-- if [[ $TRAVIS_BRANCH == "test"    ]]; then ENVIRONMENT_TYPE="qa"     ;TAG_SUFFIX="-test"   ; fi
-- if [[ $ENVIRONMENT_TYPE == ""     ]]; then ENVIRONMENT_TYPE="devtest-v${TAG_PREFIX}-${TRAVIS_BUILD_NUMBER}";TAG_SUFFIX="-devtest"; fi
-
-- TAG="${TAG_PREFIX}-${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
-- IMAGE_NAME="${TRAVIS_REPO_SLUG##*/}"
-- CONTAINER_POD_LABEL=${IMAGE_NAME}
-- CONTAINER_VER_LABEL=${TAG}
-- CONTAINER_APP_LABEL="v${VERSION_MAJOR}-${VERSION_MINOR}-${TRAVIS_BUILD_NUMBER}${TAG_SUFFIX}"
-- CONTAINER_NAME="${CONTAINER_POD_LABEL}-${ENVIRONMENT_TYPE}"
-- IMAGE_PRETAG=us.gcr.io/${GCLOUD_PROJECT_NAME}/${IMAGE_NAME}
-- IMAGE=${IMAGE_PRETAG}:${TAG}
-
-# if [[ $ENVIRONMENT_TYPE == ""     ]]; then   else IMAGE=${IMAGE_PRETAG}:${TAG} fi
-
-- for var in TAG IMAGE_NAME IMAGE TRAVIS_REPO_SLUG GCLOUD_PROJECT_NAME CLOUDSDK_COMPUTE_ZONE CONTAINER_CLUSTER ; do eval echo $var=\$$var; done
-
-# the following could be used to determine if we redeploying a build for which an image already exist
-#- gcloud alpha container images list-tags $IMAGE_PRETAG | grep " $TAG " 2>/dev/null && exit 1 or do something else TBD
-# http://stackoverflow.com/questions/35266769/how-to-list-the-published-container-images-in-the-google-container-registry-usin
-# gcloud alpha container images list --repository=gcr.io/$MYREPOSITORY
-# gcloud alpha container images list-tags gcr.io/$MYREPOSITORY/$MYIMAGE
-
-- sed -i -e "s^{{.*NEW_STUFF.*}}^${IMAGE} ${CONTAINER_NAME} TL=${TAG_LATEST} $(date)^" server.js
-- cat server.js
-
-- mkdir -p ${BUILD_VERSION_FILE_DIR}
-- echo "${TRAVIS_BUILD_NUMBER}" > ${BUILD_VERSION_FILE_DIR}/${BUILD_VERSION_FILE} 
-
-- docker build    -t    ${IMAGE} . || exit 1
-- gcloud docker -- push ${IMAGE} > /dev/null || exit 1
-- gcloud container clusters get-credentials $CONTAINER_CLUSTER --zone $CLOUDSDK_COMPUTE_ZONE || exit 1
-
-# kept in simple for now ... just update ..
-#- kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
-
-- kubectl get ${CONTAINER_TYPE} | grep "^${CONTAINER_NAME} " 2>/dev/null && CREATE_CONTAINER="no" || CREATE_CONTAINER="yes"
-- echo CREATE_CONTAINER=$CREATE_CONTAINER
-- if [[ $CREATE_CONTAINER == "yes" ]]; then 
-       sed -e "s^{{.*APP_IMAGE.*}}^${IMAGE_PRETAG}:${ENVIRONMENT_TYPE}^" 
-           -e "s^{{.*APP_NAME.*}}^${CONTAINER_NAME}^"  
-           -e "s^{{.*APP_PORT.*}}^${CONTAINER_PORT}^"  
-           -e "s^{{.*APP_POD_LABEL.*}}^${CONTAINER_POD_LABEL}^"  
-           -e "s^{{.*APP_CONTAINER_LABEL.*}}^${CONTAINER_APP_LABEL}^" hw-deployment.yaml.TEMPLATE > hw-deployment.yaml || exit 1 ;
-       pr -Fn hw-deployment.yaml.TEMPLATE hw-deployment.yaml ;
-       kubectl create -f hw-deployment.yaml --record || exit 1 ;
-       LAST_EXIT_CODE=$? ;
-  fi
-#      kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE} || exit 1 ; 
-#      LAST_EXIT_CODE=$? ;
-# else 
-
-# Note: The following is BETA and can change  per https://cloud.google.com/sdk/gcloud/reference/beta/container/images/list
-# to to check and see if latest TAG already there ... do we want to avoild multi latest flag ??
-- if [[ $TAG_SUFFIX != "-devtest"   ]]; then
-      gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:${ENVIRONMENT_TYPE} || exit 1;
-  fi
-- if [[ $LAST_EXIT_CODE == 0 && $TAG_LATEST == 1 ]]; then
-      gcloud beta container images add-tag $IMAGE $IMAGE_PRETAG:latest || exit 1;
-  fi
-
-# TODO: check to see if this image exists before creating it, else update via rolling-update
-#     || kubectl run ${CONTAINER_NAME} --image=${IMAGE} --port=8080 \
-#     || kubectl set image ${CONTAINER_TYPE}/${CONTAINER_NAME} ${CONTAINER_APP_LABEL}=${IMAGE} \
-#      && kubectl rolling-update ${CONTAINER_NAME} --image=${IMAGE}
-# the above could have been done more effectively via a yaml file, but for now above is easier to automate and debug
+#- docker build    -t    ${IMAGE} . || exit 1
 
 after_success:
-- cal
-# Useful resources: https://cloud.google.com/container-registry/
-#  https://cloud.google.com/solutions/continuous-delivery-with-travis-ci
-#  https://docs.travis-ci.com/user/notifications#Configuring-slack-notifications
-# process: https://www.pivotaltracker.com/blog/experience-report-github-flow-pivotal-web-services/
-#  http://softwareengineering.stackexchange.com/questions/255404/how-to-use-github-branches-and-automatic-releases-for-version-management
-#  https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-
+# 
+- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh | /bin/bash -x
