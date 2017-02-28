@@ -10,6 +10,7 @@ cache:
   - $HOME/google-cloud-sdk/
 
 env:
+#
 # To deploy, define below vars in this .travis.yml file or in Travi-CI configuration
 #- TRAVIS_CI_DEPLOYMENT=https://github.com/smartprocure/einstein-nanobots/tree/master/dev-ops/travis-ci
 - TRAVIS_CI_DEPLOYMENT=https://raw.githubusercontent.com/smartprocure/einstein-nanobots/ZD19127/dev-ops/travis-ci
@@ -18,16 +19,20 @@ env:
   BUILD_VERSION_FILE_DIR="./client/public"
   BUILD_VERSION_FILE="build_version.txt"
 
-#before_install:
-# 
-
-#install:
+before_install:
 #
+- echo "Nothing to do before install" 
+
+install:
+#
+- echo "Nothing to do during install" 
 
 script:
 #
-#- docker build    -t    ${IMAGE} . || exit 1
-- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x
+- echo "Nothing to do during script" 
 
-#after_success:
+#- docker build    -t    ${IMAGE} . || exit 1
+
+after_success:
 # 
+- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x
