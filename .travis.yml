@@ -29,10 +29,10 @@ install:
 
 script:
 #
-- echo "Nothing to do during script" 
-
 #- docker build    -t    ${IMAGE} . || exit 1
+- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x
+
 
 after_success:
 # 
-- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x
+- echo "Horray !!! We have reached the end !!!" 
