@@ -18,6 +18,10 @@ env:
   VERSION_MINOR=${VERSION_MINOR:=undefined}
   BUILD_VERSION_FILE_DIR="./client/public"
   BUILD_VERSION_FILE="build_version.txt"
+  GAE_PYTHONPATH=${HOME}/.cache/google_appengine
+  PATH=$PATH:${HOME}/google-cloud-sdk/bin
+  PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH}
+  CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 before_install:
 #
