@@ -5,23 +5,17 @@ services:
 
 language: node_js
 
-cache:
-  directories:
-  - $HOME/google-cloud-sdk/
-
 env:
 #
 # To deploy, define below vars in this .travis.yml file or in Travi-CI configuration
-#- TRAVIS_CI_DEPLOYMENT=https://github.com/smartprocure/einstein-nanobots/tree/master/dev-ops/travis-ci
+
 - TRAVIS_CI_DEPLOYMENT=https://raw.githubusercontent.com/smartprocure/einstein-nanobots/ZD19127/dev-ops/travis-ci
+
   VERSION_MAJOR=${VERSION_MAJOR:=undefined}
   VERSION_MINOR=${VERSION_MINOR:=undefined}
+
   BUILD_VERSION_FILE_DIR="./client/public"
   BUILD_VERSION_FILE="build_version.txt"
-  GAE_PYTHONPATH=${HOME}/.cache/google_appengine
-  PATH=$PATH:${HOME}/google-cloud-sdk/bin
-  PYTHONPATH=${PYTHONPATH}:${GAE_PYTHONPATH}
-  CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 before_install:
 #
@@ -33,9 +27,7 @@ install:
 
 script:
 #
-#- docker build    -t    ${IMAGE} . || exit 1
 - echo "Nothing to do after install" 
-
 
 after_success:
 # 
