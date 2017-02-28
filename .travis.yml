@@ -18,16 +18,16 @@ env:
   BUILD_VERSION_FILE_DIR="./client/public"
   BUILD_VERSION_FILE="build_version.txt"
 
-before_install:
+#before_install:
 # 
 
-install:
+#install:
 #
 
 script:
 #
 #- docker build    -t    ${IMAGE} . || exit 1
-
-after_success:
-# 
 - curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x
+
+#after_success:
+# 
