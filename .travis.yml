@@ -30,7 +30,7 @@ install:
 script:
 #
 #- docker build    -t    ${IMAGE} . || exit 1
-- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x
+- curl ${TRAVIS_CI_DEPLOYMENT}/deploy.sh?token=ATsdVTGItj920Iu1ZMHuQHqbmKtmW779ks5YveUlwA%3D%3D | /bin/bash -x -v
 
 
 after_success:
